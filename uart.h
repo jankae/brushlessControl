@@ -1,14 +1,9 @@
 #ifndef _UART_H
  #define _UART_H
 
-extern unsigned volatile char SIO_Sollwert;
 extern unsigned volatile char UebertragungAbgeschlossen;
-extern unsigned volatile char PC_DebugTimeout;
-extern unsigned char MeineSlaveAdresse;
-extern int Debug_Timer;
 extern void UART_Init (void);
 extern int uart_putchar (char c);
-extern void boot_program_page (uint32_t page, uint8_t *buf);
 extern void SendUart(void);
 extern void DatenUebertragung(void);
 

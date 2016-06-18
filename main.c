@@ -501,19 +501,11 @@ unsigned char SollwertErmittlung(void)
     static unsigned int sollwert = 0;
     unsigned int ppm;
     if(!I2C_Timeout)   // bei Erreichen von 0 ist der Wert ung�ltig
-        {
-        if(SIO_Timeout)  // es gibt g�ltige SIO-Daten
-            {
-             sollwert =  (MAX_PWM * (unsigned int) SIO_Sollwert) / 200;  // skalieren auf 0-200 = 0-255
-             PPM_Betrieb = 0;
-             PORTC &= ~ROT;
-            }
-            else   // Kein g�ltiger Sollwert
+        // Kein g�ltiger Sollwert
                 {
                  if(!TEST_SCHUB) { if(sollwert) sollwert--; }   
                  PORTC |= ROT;
                 }
-        }
     else // I2C-Daten sind g�ltig
         {
         sollwert = I2C_RXBuffer; 
