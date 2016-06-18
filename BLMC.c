@@ -86,8 +86,8 @@ ISR(ANA_COMP_vect)
 			if (sense) {
 				STEUER_C_L
 				;
-				if (ZeitZumAdWandeln)
-					AdConvert();
+//				if (ZeitZumAdWandeln)
+//					AdConvert();
 				SENSE_FALLING_INT;
 				SENSE_B
 				;
@@ -104,8 +104,8 @@ ISR(ANA_COMP_vect)
 			if (!sense) {
 				STEUER_B_H
 				;
-				if (ZeitZumAdWandeln)
-					AdConvert();
+//				if (ZeitZumAdWandeln)
+//					AdConvert();
 				SENSE_A
 				;
 				SENSE_RISING_INT;
@@ -123,8 +123,8 @@ ISR(ANA_COMP_vect)
 			if (sense) {
 				STEUER_A_L
 				;
-				if (ZeitZumAdWandeln)
-					AdConvert();
+//				if (ZeitZumAdWandeln)
+//					AdConvert();
 				SENSE_C
 				;
 				SENSE_FALLING_INT;
@@ -142,8 +142,8 @@ ISR(ANA_COMP_vect)
 			if (!sense) {
 				STEUER_C_H
 				;
-				if (ZeitZumAdWandeln)
-					AdConvert();
+//				if (ZeitZumAdWandeln)
+//					AdConvert();
 				SENSE_B
 				;
 				SENSE_RISING_INT;
@@ -161,8 +161,8 @@ ISR(ANA_COMP_vect)
 			if (sense) {
 				STEUER_B_L
 				;
-				if (ZeitZumAdWandeln)
-					AdConvert();
+//				if (ZeitZumAdWandeln)
+//					AdConvert();
 				SENSE_A
 				;
 				SENSE_FALLING_INT;
@@ -180,8 +180,8 @@ ISR(ANA_COMP_vect)
 			if (!sense) {
 				STEUER_A_H
 				;
-				if (ZeitZumAdWandeln)
-					AdConvert();
+//				if (ZeitZumAdWandeln)
+//					AdConvert();
 				SENSE_C
 				;
 				SENSE_RISING_INT;
@@ -207,7 +207,7 @@ ISR(ANA_COMP_vect)
 			time -= (TIM0atLastCommutation - timer0);
 		}
 		TIM0atLastCommutation = timer0;
-		RPM = 8571428L/time;
+		RPM = (60000000L/(POLANZAHL/2))/time;
 	}
 	ZeitZumAdWandeln = 0;
 }

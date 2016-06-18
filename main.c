@@ -118,9 +118,9 @@ void DebugAusgaben(void)
     DebugOut.Analog[0] = Strom;
     DebugOut.Analog[1] = Mittelstrom;
     DebugOut.Analog[2] = SIO_Drehzahl;
-    DebugOut.Analog[3] = 0;
+    DebugOut.Analog[3] = RPM;
     DebugOut.Analog[4] = OCR2;
-//    DebugOut.Analog[5] = PWM;
+    DebugOut.Analog[5] = PWM;
 }
 
 //############################################################################

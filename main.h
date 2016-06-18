@@ -3,16 +3,16 @@
 
 //#define MOTORADRESSE      0  // Adresse (1-4)     0 = Motoradresse �ber L�tjumper auf BL-Ctrl V1.1
 
-#define MANUELL_PWM       0   // zur manuellen Vorgabe der PWM  Werte: 0-255
+#define MANUELL_PWM       30   // zur manuellen Vorgabe der PWM  Werte: 0-255
 #define TEST_MANUELL      0   // zum Testen der Hardware ohne Kommutierungsdetektion  Werte: 0-255 (PWM)
 #define TEST_SCHUB        0	  // Erzeugt ein Schubmuster        Werte: 0 = normal 1 = Test
-#define POLANZAHL        12   // Anzahl der Pole (Magnete) Wird nur zur Drehzahlausgabe �ber Debug gebraucht
+#define POLANZAHL        14   // Anzahl der Pole (Magnete) Wird nur zur Drehzahlausgabe �ber Debug gebraucht
 #define MAX_PWM         255
 #define MIN_PWM           3
 #define MIN_PPM          10   // ab hier (PPM-Signal) schaltet der Regler erst ein
 #define FILTER_PPM        7   // wie stark soll das PPM-Signal gefiltert werden (Werte: 0-30)?
 
-#define SIO_DEBUG         0   // Testwertausgaben auf der seriellen Schnittstelle
+#define SIO_DEBUG         1   // Testwertausgaben auf der seriellen Schnittstelle
 #define X3D_SIO           0	  // serielles Protokoll des X3D (38400Bd) Achtung: dann muss SIO_DEBUG = 0 sein
 
 #define _16KHZ    // Schaltfrequenz  -- die gew�nschte einkommentieren

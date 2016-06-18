@@ -20,7 +20,7 @@ struct str_DebugOut
 
 extern struct str_DebugOut    DebugOut;
 //Die Baud_Rate der Seriellen Schnittstelle 
-//#define BAUD_RATE 9600		//Baud Rate f�r die Serielle Schnittstelle	
+//#define BAUD_RATE 9600		//Baud Rate f�r die Serielle Schnittstelle
 //#define BAUD_RATE 14400		//Baud Rate f�r die Serielle Schnittstelle	
 //#define BAUD_RATE 28800		//Baud Rate f�r die Serielle Schnittstelle	
 

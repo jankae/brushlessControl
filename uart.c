@@ -40,18 +40,18 @@ void SendUart(void)
  static unsigned int ptr = 0;
  unsigned char tmp_tx;
  if(!(UCSRA & 0x40)) return;
- if(!UebertragungAbgeschlossen)  
+ if(!UebertragungAbgeschlossen)
   {
    ptr++;                    // die [0] wurde schon gesendet
-   tmp_tx = SendeBuffer[ptr];  
+   tmp_tx = SendeBuffer[ptr];
    if((tmp_tx == '\r') || (ptr == MAX_SENDE_BUFF))
     {
      ptr = 0;
      UebertragungAbgeschlossen = 1;
     }
    USR |= (1<TXC);
-   UDR = tmp_tx; 
-  } 
+   UDR = tmp_tx;
+  }
   else ptr = 0;
 }
 
@@ -86,7 +86,7 @@ void Decode64(unsigned char *ptrOut, unsigned char len, unsigned char ptrIn,unsi
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 SIGNAL(INT_VEC_RX)
 {
- 
+
 #if  X3D_SIO == 1
  static unsigned char serPacketCounter = 100;
     SioTmp = UDR;
@@ -94,7 +94,7 @@ SIGNAL(INT_VEC_RX)
 	 {
   	  serPacketCounter = 0;
 	 }
-	else 
+	else
 	 {
     	  if(++serPacketCounter == MotorAdresse) // (1-4)
     	  {
@@ -102,7 +102,7 @@ SIGNAL(INT_VEC_RX)
             SIO_Timeout = 200; // werte f�r 200ms g�ltig
     	  }
     	  else
-    	  { 
+    	  {
     	   if(serPacketCounter > 100) serPacketCounter = 100;
 		  }
 	 }
@@ -111,10 +111,10 @@ SIGNAL(INT_VEC_RX)
  static unsigned char crc1,crc2,buf_ptr;
  static unsigned char UartState = 0;
  unsigned char CrcOkay = 0;
- 
+
  SioTmp = UDR;
  if(buf_ptr >= MAX_EMPFANGS_BUFF)    UartState = 0;
- if(SioTmp == '\r' && UartState == 2) 
+ if(SioTmp == '\r' && UartState == 2)
   {
    UartState = 0;
    crc -= RxdBuffer[buf_ptr-2];
@@ -126,19 +126,19 @@ SIGNAL(INT_VEC_RX)
    if((crc1 == RxdBuffer[buf_ptr-2]) && (crc2 == RxdBuffer[buf_ptr-1])) CrcOkay = 1; else { CrcOkay = 0; };
    if(CrcOkay) // Datensatz schon verarbeitet
     {
-     //NeuerDatensatzEmpfangen = 1; 
+     //NeuerDatensatzEmpfangen = 1;
 	 AnzahlEmpfangsBytes = buf_ptr;
-     
+
      RxdBuffer[buf_ptr] = '\r';
 	 if(/*(RxdBuffer[1] == MeineSlaveAdresse || (RxdBuffer[1] == 'a')) && */(RxdBuffer[2] == 'R')) wdt_enable(WDTO_250MS); // Reset-Commando
-     uart_putchar(RxdBuffer[2]);	 
+     uart_putchar(RxdBuffer[2]);
 	 if (RxdBuffer[2] == 't') // Motortest
             { Decode64((unsigned char *) &MotorTest[0],sizeof(MotorTest),3,AnzahlEmpfangsBytes);
 			  SIO_Sollwert = MotorTest[MotorAdresse - 1];
               SIO_Timeout = 500; // werte f�r 500ms g�ltig
- 
+
 			}
-	}				  
+	}
   }
   else
   switch(UartState)
@@ -156,16 +156,16 @@ SIGNAL(INT_VEC_RX)
 		  break;
    case 2: //  Eingangsdaten sammeln
 		  RxdBuffer[buf_ptr] = SioTmp;
-		  if(buf_ptr < MAX_EMPFANGS_BUFF) buf_ptr++; 
+		  if(buf_ptr < MAX_EMPFANGS_BUFF) buf_ptr++;
 		  else UartState = 0;
 		  crc += SioTmp;
 		  break;
-   default: 
-          UartState = 0; 
+   default:
+          UartState = 0;
           break;
   }
 
-	 
+
 #endif
 };
 
@@ -173,7 +173,7 @@ SIGNAL(INT_VEC_RX)
 // --------------------------------------------------------------------------
 void AddCRC(unsigned int wieviele)
 {
- unsigned int tmpCRC = 0,i; 
+ unsigned int tmpCRC = 0,i;
  for(i = 0; i < wieviele;i++)
   {
    tmpCRC += SendeBuffer[i];
@@ -188,28 +188,33 @@ void AddCRC(unsigned int wieviele)
 
 
 // --------------------------------------------------------------------------
-void SendOutData(unsigned char cmd,unsigned char modul, unsigned char *snd, unsigned char len)
+void SendOutData(unsigned char cmd,unsigned char modul, unsigned int *snd, unsigned char num)
 {
  unsigned int pt = 0;
  unsigned char a,b,c;
  unsigned char ptr = 0;
- 
 
- SendeBuffer[pt++] = '#';               // Startzeichen
- SendeBuffer[pt++] = modul;             // Adresse (a=0; b=1,...)
- SendeBuffer[pt++] = cmd;		        // Commando
 
- while(len)
+// SendeBuffer[pt++] = '#';               // Startzeichen
+// SendeBuffer[pt++] = modul;             // Adresse (a=0; b=1,...)
+// SendeBuffer[pt++] = cmd;		        // Commando
+
+ uint8_t i;
+ for(i=0;i<num;i++)
   {
-   if(len) { a = snd[ptr++]; len--;} else a = 0;
-   if(len) { b = snd[ptr++]; len--;} else b = 0;
-   if(len) { c = snd[ptr++]; len--;} else c = 0;
-   SendeBuffer[pt++] = '=' + (a >> 2);
-   SendeBuffer[pt++] = '=' + (((a & 0x03) << 4) | ((b & 0xf0) >> 4));
-   SendeBuffer[pt++] = '=' + (((b & 0x0f) << 2) | ((c & 0xc0) >> 6));
-   SendeBuffer[pt++] = '=' + ( c & 0x3f);
+	 SendeBuffer[pt++] = ' ';
+	 SendeBuffer[pt++] = 'A';
+	 SendeBuffer[pt++] = '0' + i;
+	 SendeBuffer[pt++] = ':';
+	 SendeBuffer[pt++] = ' ';
+	 SendeBuffer[pt++] = '0' + snd[i] / 10000;
+	 SendeBuffer[pt++] = '0' + (snd[i] / 1000)%10;
+	 SendeBuffer[pt++] = '0' + (snd[i] / 100)%10;
+	 SendeBuffer[pt++] = '0' + (snd[i] / 10)%10;
+	 SendeBuffer[pt++] = '0' + snd[i] % 10;
   }
- AddCRC(pt);
+ SendeBuffer[pt++] = '\n';
+// AddCRC(pt);
 }
 
 
@@ -225,7 +230,7 @@ int uart_putchar (char c)
 	loop_until_bit_is_set(USR, UDRE);
 	//Ausgabe des Zeichens
 	UDR = c;
-	
+
 	return (0);
 }
 
@@ -243,10 +248,10 @@ void UART_Init (void)
 
 	UCR=(1 << TXEN) | (1 << RXEN);
     // UART Double Speed (U2X)
-	USR   |= (1<<U2X);           
+	USR   |= (1<<U2X);
 	// RX-Interrupt Freigabe
 
-	UCSRB |= (1<<RXCIE);    // serieller Empfangsinterrupt       
+	UCSRB |= (1<<RXCIE);    // serieller Empfangsinterrupt
 
 	// TX-Interrupt Freigabe
 //	UCSRB |= (1<<TXCIE);           
@@ -255,7 +260,7 @@ void UART_Init (void)
 	UBRR= (SYSCLK / (BAUD_RATE * 8L) -1 );
 	//�ffnet einen Kanal f�r printf (STDOUT)
 //	fdevopen (uart_putchar, NULL);
-    Debug_Timer = SetDelay(200);   
+    Debug_Timer = SetDelay(200);
 //    // Version beim Start ausgeben (nicht sch�n, aber geht... )
 //	uart_putchar ('\n');uart_putchar ('B');uart_putchar ('L');uart_putchar (':');
 //	uart_putchar ('V');uart_putchar (0x30 + VERSION_HAUPTVERSION);uart_putchar ('.');uart_putchar (0x30 + VERSION_NEBENVERSION/10); uart_putchar (0x30 + VERSION_NEBENVERSION%10);
@@ -268,11 +273,11 @@ void UART_Init (void)
 
 
 //---------------------------------------------------------------------------------------------
-void DatenUebertragung(void)  
+void DatenUebertragung(void)
 {
  if((CheckDelay(Debug_Timer) && UebertragungAbgeschlossen))	 // im Singlestep-Betrieb in jedem Schtitt senden
     	 {
-    	  SendOutData('D',MeineSlaveAdresse,(unsigned char *) &DebugOut,sizeof(DebugOut));
+    	  SendOutData('D',MeineSlaveAdresse,DebugOut.Analog,8);
        	  Debug_Timer = SetDelay(50);   // Sendeintervall
-    	 } 
+    	 }
 }
