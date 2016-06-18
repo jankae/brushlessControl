@@ -96,13 +96,10 @@
 #include <avr/wdt.h>
 
 #include "twislave.h"
-#include "old_macros.h"
 #include "analog.h"
 #include "uart.h"
 #include "timer0.h"
 #include "BLMC.h"
-
-#include "PPM_Decode.h"
 
 extern unsigned int  I2C_Timeout;
 extern unsigned int SIO_Timeout;

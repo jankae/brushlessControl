@@ -254,7 +254,7 @@ void UART_Init (void)
 	//Teiler wird gesetzt 
 	UBRR= (SYSCLK / (BAUD_RATE * 8L) -1 );
 	//�ffnet einen Kanal f�r printf (STDOUT)
-	fdevopen (uart_putchar, NULL);
+//	fdevopen (uart_putchar, NULL);
     Debug_Timer = SetDelay(200);   
 //    // Version beim Start ausgeben (nicht sch�n, aber geht... )
 //	uart_putchar ('\n');uart_putchar ('B');uart_putchar ('L');uart_putchar (':');

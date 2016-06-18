@@ -3,6 +3,8 @@
 //#define TIMER_RELOAD_VALUE    125
 #endif
 
+#define TIM0_START       TIMSK |= 0x01
+#define TIMER2_INT_ENABLE   TIMSK |= 0x40
 
 extern volatile unsigned int CountMilliseconds;
 extern volatile unsigned char Timer0Overflow;

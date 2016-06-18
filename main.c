@@ -118,7 +118,7 @@ void DebugAusgaben(void)
     DebugOut.Analog[0] = Strom;
     DebugOut.Analog[1] = Mittelstrom;
     DebugOut.Analog[2] = SIO_Drehzahl;
-    DebugOut.Analog[3] = PPM_Signal;
+    DebugOut.Analog[3] = 0;
     DebugOut.Analog[4] = OCR2;
 //    DebugOut.Analog[5] = PWM;
 }
@@ -268,7 +268,7 @@ void MotorTon(void)
 //############################################################################
 {
     unsigned char ADR_TAB[9] = {0,0,2,1,3,4,5,6,7};
-    unsigned int timer = 300,i;
+    unsigned int i;
     unsigned int t = 0;
     unsigned char anz = 0,MosfetOkay = 0, grenze = 50;
 
@@ -506,23 +506,8 @@ unsigned char SollwertErmittlung(void)
             {
              sollwert =  (MAX_PWM * (unsigned int) SIO_Sollwert) / 200;  // skalieren auf 0-200 = 0-255
              PPM_Betrieb = 0;
-             ICP_INT_DISABLE;
              PORTC &= ~ROT;
             }
-        else
-            if(anz_ppm_werte > 20)  // es gibt g�ltige PPM-Daten
-                {
-                PPM_Betrieb = 1;
-                ppm = PPM_Signal;
-                if(ppm > 300) ppm =   0;  // ung�ltiges Signal
-                if(ppm > 200) ppm = 200;
-                if(ppm <= MIN_PPM) sollwert = 0;
-                else 
-                    {
-                    sollwert = (int) MIN_PWM + ((MAX_PWM - MIN_PWM) * (ppm - MIN_PPM)) / (190 - MIN_PPM);
-                    }
-                PORTC &= ~ROT;
-                }
             else   // Kein g�ltiger Sollwert
                 {
                  if(!TEST_SCHUB) { if(sollwert) sollwert--; }   
@@ -534,7 +519,6 @@ unsigned char SollwertErmittlung(void)
         sollwert = I2C_RXBuffer; 
         PPM_Betrieb = 0;
         PORTC &= ~ROT;
-        ICP_INT_DISABLE;
         }
     if(sollwert > MAX_PWM) sollwert = MAX_PWM;
     return(sollwert); 
@@ -603,7 +587,6 @@ int main (void)
 
 
     InitIC2_Slave(0x50);			    
-    InitPPM();
 
     Blink             = SetDelay(101);    
     Blink2            = SetDelay(102);
@@ -626,7 +609,6 @@ int main (void)
 
     MinUpmPulse = SetDelay(10);
     DebugOut.Analog[1] = 1;
-    PPM_Signal = 0;
 
     if(!SollwertErmittlung()) MotorTon();
 //MotorTon();    

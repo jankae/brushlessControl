@@ -32,7 +32,6 @@ ISR(TIMER0_OVF_vect)
    cnt = 3;
    CountMilliseconds += 1;
    if(I2C_Timeout) I2C_Timeout--;
-   if(PPM_Timeout) PPM_Timeout--; else anz_ppm_werte = 0;
    if(SIO_Timeout) SIO_Timeout--;
   } 
 }
