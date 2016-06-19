@@ -66,7 +66,7 @@ unsigned int  I2C_Timeout = 0;
 unsigned int SIO_Timeout = 0;
 unsigned int  SollDrehzahl = 0;
 unsigned int  IstDrehzahl = 0;
-unsigned int  DrehZahlTabelle[256];//vorberechnete Werte zur Drehzahlerfassung
+uint8_t  RPMToPWM[150];//vorberechnete Werte zur Drehzahlerfassung
 unsigned char ZeitFuerBerechnungen = 1;
 unsigned char MotorAnwerfen = 0;
 unsigned char MotorGestoppt = 1;
