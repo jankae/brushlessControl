@@ -487,7 +487,6 @@ unsigned char SollwertErmittlung(void)
 //############################################################################
 {
     static unsigned int sollwert = 0;
-    unsigned int ppm;
     if(!I2C_Timeout)   // bei Erreichen von 0 ist der Wert ung�ltig
         // Kein g�ltiger Sollwert
                 {
@@ -496,7 +495,7 @@ unsigned char SollwertErmittlung(void)
                 }
     else // I2C-Daten sind g�ltig
         {
-        sollwert = I2C_RXBuffer; 
+        sollwert = twi.PWM;
         PORTC &= ~ROT;
         }
     if(sollwert > MAX_PWM) sollwert = MAX_PWM;
@@ -563,7 +562,7 @@ int main (void)
     PWM_Init();	
 
 
-    InitIC2_Slave(0x50);			    
+    twi_Init(0x50);			    
 
     MinUpmPulse       = SetDelay(103);
     MittelstromTimer  = SetDelay(254);
