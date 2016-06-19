@@ -55,8 +55,7 @@
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #include "main.h"
 
-volatile unsigned char Phase = 0, ShadowTCCR1A = 0;
-volatile unsigned char CompFreigabeTimer = 100;
+volatile unsigned char Phase = 0;
 volatile unsigned char CompInterruptFreigabe = 0;
 
 //############################################################################
@@ -92,7 +91,6 @@ ISR(ANA_COMP_vect)
 				SENSE_B
 				;
 				Phase++;
-				CntKommutierungen++;
 			} else {
 				STEUER_B_L
 				;
@@ -110,7 +108,6 @@ ISR(ANA_COMP_vect)
 				;
 				SENSE_RISING_INT;
 				Phase++;
-				CntKommutierungen++;
 			} else {
 				STEUER_A_H
 				;
@@ -129,7 +126,6 @@ ISR(ANA_COMP_vect)
 				;
 				SENSE_FALLING_INT;
 				Phase++;
-				CntKommutierungen++;
 			} else {
 				STEUER_C_L
 				;
@@ -148,7 +144,6 @@ ISR(ANA_COMP_vect)
 				;
 				SENSE_RISING_INT;
 				Phase++;
-				CntKommutierungen++;
 			} else {
 				STEUER_B_H
 				;
@@ -167,7 +162,6 @@ ISR(ANA_COMP_vect)
 				;
 				SENSE_FALLING_INT;
 				Phase++;
-				CntKommutierungen++;
 			} else {
 				STEUER_A_L
 				;
@@ -186,7 +180,6 @@ ISR(ANA_COMP_vect)
 				;
 				SENSE_RISING_INT;
 				Phase = 0;
-				CntKommutierungen++;
 			} else {
 				STEUER_C_H
 				;

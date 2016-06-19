@@ -5,7 +5,6 @@
 #define BLMC_H_
 
 extern volatile unsigned char Phase;
-extern volatile unsigned char ShadowTCCR1A;
 extern volatile unsigned char CompInterruptFreigabe;
 
 void Blc(void);

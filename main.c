@@ -60,22 +60,15 @@ unsigned int  PWM = 0;
 unsigned int  Strom = 0,RuheStrom; //ca. in 0,1A
 unsigned char Strom_max = 0;
 unsigned char Mittelstrom = 0; 
-unsigned int  Drehzahl = 0;  // in 100UPM  60 = 6000
-unsigned int  KommutierDelay = 10;
 unsigned int  I2C_Timeout = 0;
-unsigned int SIO_Timeout = 0;
-unsigned int  SollDrehzahl = 0;
-unsigned int  IstDrehzahl = 0;
 uint8_t  RPMToPWM[150];//vorberechnete Werte zur Drehzahlerfassung
 unsigned char ZeitFuerBerechnungen = 1;
 unsigned char MotorAnwerfen = 0;
 unsigned char MotorGestoppt = 1;
 unsigned char MaxPWM = MAX_PWM;
-unsigned int  CntKommutierungen = 0;
 //unsigned int  SIO_Drehzahl = 0;
 unsigned char ZeitZumAdWandeln = 1;
 unsigned char MotorAdresse = 1;
-unsigned char PPM_Betrieb = 1;
 unsigned char HwVersion;
 unsigned char IntRef = 0;
 unsigned int MinUpmPulse;
@@ -509,7 +502,6 @@ unsigned char SollwertErmittlung(void)
     else // I2C-Daten sind g�ltig
         {
         sollwert = I2C_RXBuffer; 
-        PPM_Betrieb = 0;
         PORTC &= ~ROT;
         }
     if(sollwert > MAX_PWM) sollwert = MAX_PWM;
@@ -678,14 +670,14 @@ int main (void)
                     }
                 }
 
-            if(CheckDelay(DrehzahlMessTimer))   // Ist-Drehzahl bestimmen
-                {
-                DrehzahlMessTimer = SetDelay(10);
-                SIO_Drehzahl = CntKommutierungen;//(6 * CntKommutierungen) / (POLANZAHL / 2);
-                CntKommutierungen = 0;
-               // if(PPM_Timeout == 0) // keine PPM-Signale
-                ZeitZumAdWandeln = 1;
-                }
+//            if(CheckDelay(DrehzahlMessTimer))   // Ist-Drehzahl bestimmen
+//                {
+//                DrehzahlMessTimer = SetDelay(10);
+//                SIO_Drehzahl = CntKommutierungen;//(6 * CntKommutierungen) / (POLANZAHL / 2);
+//                CntKommutierungen = 0;
+//               // if(PPM_Timeout == 0) // keine PPM-Signale
+//                ZeitZumAdWandeln = 1;
+//                }
 
 #if TEST_SCHUB == 1
            {

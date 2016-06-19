@@ -102,18 +102,15 @@
 #include "BLMC.h"
 
 extern unsigned int  I2C_Timeout;
-extern unsigned int SIO_Timeout;
 extern unsigned int  PWM;
 extern unsigned int  Strom;     //ca. in 0,1A
 extern unsigned char Strom_max;
 extern unsigned char Mittelstrom;
-extern unsigned int  CntKommutierungen;
 extern unsigned char MotorAnwerfen;
 extern unsigned char MotorGestoppt;
 extern unsigned char ZeitZumAdWandeln;
 extern unsigned char MaxPWM;
 extern unsigned char MotorAdresse; 
-extern unsigned char PPM_Betrieb;
 extern unsigned char HwVersion;
 extern unsigned char IntRef;
 unsigned int SIO_Drehzahl;
