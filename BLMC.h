@@ -5,6 +5,8 @@
 #include "timer0.h"
 
 #define BLDC_NUM_POLES			14
+#define MAX_PWM        		 	255
+#define MIN_PWM           		3
 
 struct {
 	uint8_t phase;

@@ -61,7 +61,6 @@ unsigned int  Strom = 0,RuheStrom; //ca. in 0,1A
 unsigned char Strom_max = 0;
 unsigned char Mittelstrom = 0; 
 unsigned int  I2C_Timeout = 0;
-uint8_t  RPMToPWM[150];//vorberechnete Werte zur Drehzahlerfassung
 unsigned char ZeitFuerBerechnungen = 1;
 unsigned char MotorAnwerfen = 0;
 unsigned char MotorGestoppt = 1;
@@ -597,6 +596,8 @@ int main (void)
         //I2C_TXBuffer = PWM; // Antwort �ber I2C-Bus
         if(MANUELL_PWM)   PWM = MANUELL_PWM;
 
+        PWM = control.out;
+
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         if(bldc.phase != altPhase)   // es gab eine Kommutierung im Interrupt
             {
@@ -634,6 +635,10 @@ int main (void)
 //              GRN_ON; 
               FastADConvert();
              }
+            if(!control.samplingFinished){
+            	// no sampling data available
+            	control_Sample();
+            }
             if(SIO_DEBUG)
                 {
                 DebugAusgaben();  // welche Werte sollen angezeigt werden?
