@@ -113,8 +113,6 @@ extern unsigned char MaxPWM;
 extern unsigned char MotorAdresse; 
 extern unsigned char HwVersion;
 extern unsigned char IntRef;
-unsigned int SIO_Drehzahl;
-unsigned int RPM;
 unsigned int RPMbuffer;
 #define ROT    0x08
 #define GRUEN  0x80	

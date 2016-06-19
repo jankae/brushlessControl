@@ -109,7 +109,6 @@ void DebugAusgaben(void)
 {
     uart.Analog[0] = Strom;
     uart.Analog[1] = Mittelstrom;
-    uart.Analog[2] = SIO_Drehzahl;
     uart.Analog[3] = bldc.RPM;
     uart.Analog[4] = OCR2;
     uart.Analog[5] = PWM;
@@ -513,9 +512,7 @@ int main (void)
 {
     char altPhase = 0;
     int test = 0;
-    SIO_Drehzahl = 0;
-    unsigned int Blink,TestschubTimer;
-    unsigned int Blink2,MittelstromTimer,DrehzahlMessTimer,MotorGestopptTimer;
+    unsigned int MittelstromTimer,MotorGestopptTimer;
 
     DDRC  = 0x08;
     PORTC = 0x08;
@@ -568,12 +565,8 @@ int main (void)
 
     InitIC2_Slave(0x50);			    
 
-    Blink             = SetDelay(101);    
-    Blink2            = SetDelay(102);
     MinUpmPulse       = SetDelay(103);
     MittelstromTimer  = SetDelay(254);
-    DrehzahlMessTimer = SetDelay(1005);
-    TestschubTimer    = SetDelay(1006);
     while(!DelayElapsed(MinUpmPulse))
     {
      if(SollwertErmittlung()) break;
@@ -665,34 +658,8 @@ int main (void)
                     }
                 }
 
-//            if(CheckDelay(DrehzahlMessTimer))   // Ist-Drehzahl bestimmen
-//                {
-//                DrehzahlMessTimer = SetDelay(10);
-//                SIO_Drehzahl = CntKommutierungen;//(6 * CntKommutierungen) / (POLANZAHL / 2);
-//                CntKommutierungen = 0;
-//               // if(PPM_Timeout == 0) // keine PPM-Signale
-//                ZeitZumAdWandeln = 1;
-//                }
-
-#if TEST_SCHUB == 1
-           {
-            if(DelayElapsed(TestschubTimer))  
-                {
-                TestschubTimer = SetDelay(1500);
-                    switch(test) 
-                        {
-                        case 0: PWM = 50; test++; break;
-                        case 1: PWM = 130; test++; break;
-                        case 2: PWM = 60;  test++; break;
-                        case 3: PWM = 140; test++; break;
-                        case 4: PWM = 150; test = 0; break;
-                        default: test = 0;
-                        } 
-                }
-            }  
-#endif
           // Motor Stehen geblieben
-            if((DelayElapsed(MinUpmPulse) && SIO_Drehzahl == 0) || MotorAnwerfen) 
+            if(DelayElapsed(MinUpmPulse) || MotorAnwerfen)
                 {
                 MotorGestoppt = 1;    
                 BLDC_DisableAutoCommutation();
@@ -725,8 +692,6 @@ int main (void)
                         MotorAnwerfen = 1;
                       }  
                     }
-				    // Drehzahlmessung wieder aufsetzen
-                    DrehzahlMessTimer = SetDelay(50);
                     altPhase = 7;
                    }
                    else if(SollwertErmittlung()) MotorAnwerfen = 1;
