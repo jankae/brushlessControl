@@ -89,7 +89,6 @@ void SetPWM(void)
         OCR1A = 0; OCR1B = 0; OCR2 = 0;
         PORTD &= ~0x38;
         PORTC |= ROT;
-        DebugOut.Analog[6]++;
         Strom--;
         }
     else 
@@ -108,12 +107,12 @@ void SetPWM(void)
 
 void DebugAusgaben(void)
 {
-    DebugOut.Analog[0] = Strom;
-    DebugOut.Analog[1] = Mittelstrom;
-    DebugOut.Analog[2] = SIO_Drehzahl;
-    DebugOut.Analog[3] = RPM;
-    DebugOut.Analog[4] = OCR2;
-    DebugOut.Analog[5] = PWM;
+    uart.Analog[0] = Strom;
+    uart.Analog[1] = Mittelstrom;
+    uart.Analog[2] = SIO_Drehzahl;
+    uart.Analog[3] = RPM;
+    uart.Analog[4] = OCR2;
+    uart.Analog[5] = PWM;
 }
 
 //############################################################################
@@ -178,8 +177,7 @@ char Anwerfen(unsigned char pwm)
         {
         for(i=0;i<timer; i++) 
             {
-            if(!UebertragungAbgeschlossen)  SendUart();
-            else DatenUebertragung();
+            uart_SendDebug();
             Wait(100);  // warten
             } 
         DebugAusgaben();
@@ -269,7 +267,6 @@ void MotorTon(void)
     Delay_ms(300 * ADR_TAB[MotorAdresse]);    
     DISABLE_SENSE_INT;
     cli();//Globale Interrupts Ausschalten
-    uart_putchar('\n');
     STEUER_OFF;
     Strom_max = 0;
     DelayM(50);
@@ -324,7 +321,7 @@ if(anz) while(1) RotBlink(anz);  // bei Kurzschluss nicht starten
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //+ LOW-Mosfets auf Schalten und Kurzschluss testen
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- if(UDR == ' ') {t = 65535; grenze = 40; uart_putchar('_');} else t = 1000; // Ausf�hrlicher Test
+ if(UDR == ' ') {t = 65535; grenze = 40;} else t = 1000; // Ausf�hrlicher Test
  Strom = 0;
  for(i=0;i<t;i++)
  {
@@ -335,7 +332,7 @@ if(anz) while(1) RotBlink(anz);  // bei Kurzschluss nicht starten
   HIGH_A_EIN;
   DelayM(1);
   FETS_OFF;
-  if(Strom > grenze + RuheStrom) {anz = 4; uart_putchar('4'); FETS_OFF; break;}
+  if(Strom > grenze + RuheStrom) {anz = 4; FETS_OFF; break;}
   Delay(5);
  }
  Delay(10000);
@@ -350,7 +347,7 @@ if(anz) while(1) RotBlink(anz);  // bei Kurzschluss nicht starten
   HIGH_B_EIN;
   DelayM(1);
   FETS_OFF;
-  if(Strom > grenze + RuheStrom) {anz = 5; uart_putchar('5'); FETS_OFF;break;}
+  if(Strom > grenze + RuheStrom) {anz = 5; FETS_OFF;break;}
   Delay(5);
  } 
 
@@ -366,7 +363,7 @@ if(anz) while(1) RotBlink(anz);  // bei Kurzschluss nicht starten
   HIGH_C_EIN;
   DelayM(1);
   FETS_OFF;
-  if(Strom > grenze + RuheStrom) {anz = 6; uart_putchar('6'); FETS_OFF; break;}
+  if(Strom > grenze + RuheStrom) {anz = 6; FETS_OFF; break;}
   Delay(5);
  } 
 
@@ -473,17 +470,16 @@ if(anz) while(1) RotBlink(anz);  // bei Kurzschluss nicht starten
      }
 */
  Delay_ms(300 * (4-ADR_TAB[MotorAdresse]));    
- if(!(MosfetOkay & 0x01))  { anz = 1; UDR='A'; } else
- if(!(MosfetOkay & 0x02))  { anz = 2; UDR='B'; } else
- if(!(MosfetOkay & 0x04))  { anz = 3; UDR='C'; } else
- if(!(MosfetOkay & 0x08))  { anz = 4; UDR='a'; } else
- if(!(MosfetOkay & 0x10))  { anz = 5; UDR='b'; } else
- if(!(MosfetOkay & 0x20))  { anz = 6; UDR='c'; }  
+ if(!(MosfetOkay & 0x01))  { anz = 1; } else
+ if(!(MosfetOkay & 0x02))  { anz = 2; } else
+ if(!(MosfetOkay & 0x04))  { anz = 3; } else
+ if(!(MosfetOkay & 0x08))  { anz = 4; } else
+ if(!(MosfetOkay & 0x10))  { anz = 5; } else
+ if(!(MosfetOkay & 0x20))  { anz = 6; }
 
 // if(anz) Delay_ms(1000); 
  if(anz) while(1) RotBlink(anz);  // bei Kurzschluss nicht starten
  RotBlink(anz);
- uart_putchar('.');
 }
 
 //############################################################################
@@ -550,7 +546,7 @@ int main (void)
 #endif
     if(PIND & 0x80) {HwVersion = 12; IntRef = 0xc0;}    
     DDRD  = 0xBA;
-    UART_Init();
+    uart_Init();
     Timer0_Init();
     sei();//Globale Interrupts Einschalten
     
@@ -592,7 +588,7 @@ int main (void)
     ADMUX = 1; 
 
     MinUpmPulse = SetDelay(10);
-    DebugOut.Analog[1] = 1;
+    uart.Analog[1] = 1;
 
     if(!SollwertErmittlung()) MotorTon();
 //MotorTon();    
@@ -649,8 +645,7 @@ int main (void)
             if(SIO_DEBUG)
                 {
                 DebugAusgaben();  // welche Werte sollen angezeigt werden?
-                if(!UebertragungAbgeschlossen)  SendUart(); 
-                else DatenUebertragung();
+                uart_SendDebug();
                 }
             // Berechnen des Mittleren Stroms zur (langsamen) Strombegrenzung
             if(CheckDelay(MittelstromTimer))   
