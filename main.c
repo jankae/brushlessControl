@@ -162,7 +162,7 @@ char Anwerfen(unsigned char pwm)
     Manuell();
 //    Delay_ms(200);
                     MinUpmPulse = SetDelay(300);
-                    while(!CheckDelay(MinUpmPulse)) 
+                    while(!DelayElapsed(MinUpmPulse)) 
                     {
                      FastADConvert();
                       if(Strom > 120) 
@@ -574,7 +574,7 @@ int main (void)
     MittelstromTimer  = SetDelay(254);
     DrehzahlMessTimer = SetDelay(1005);
     TestschubTimer    = SetDelay(1006);
-    while(!CheckDelay(MinUpmPulse))
+    while(!DelayElapsed(MinUpmPulse))
     {
      if(SollwertErmittlung()) break;
     }
@@ -619,7 +619,7 @@ int main (void)
             MotorAnwerfen = 0;      // kein Startversuch
             ZeitFuerBerechnungen = 0;
             // nach 1,5 Sekunden den Motor als gestoppt betrachten 
-            if(CheckDelay(MotorGestopptTimer)) 
+            if(DelayElapsed(MotorGestopptTimer)) 
                 {
                 DISABLE_SENSE_INT;
                 MotorGestoppt = 1;  
@@ -648,7 +648,7 @@ int main (void)
                 uart_SendDebug();
                 }
             // Berechnen des Mittleren Stroms zur (langsamen) Strombegrenzung
-            if(CheckDelay(MittelstromTimer))   
+            if(DelayElapsed(MittelstromTimer))   
                 {
                 MittelstromTimer = SetDelay(50); // alle 50ms
                 if(Mittelstrom <  Strom) Mittelstrom++;// Mittelwert des Stroms bilden
@@ -676,7 +676,7 @@ int main (void)
 
 #if TEST_SCHUB == 1
            {
-            if(CheckDelay(TestschubTimer))  
+            if(DelayElapsed(TestschubTimer))  
                 {
                 TestschubTimer = SetDelay(1500);
                     switch(test) 
@@ -692,7 +692,7 @@ int main (void)
             }  
 #endif
           // Motor Stehen geblieben
-            if((CheckDelay(MinUpmPulse) && SIO_Drehzahl == 0) || MotorAnwerfen) 
+            if((DelayElapsed(MinUpmPulse) && SIO_Drehzahl == 0) || MotorAnwerfen) 
                 {
                 MotorGestoppt = 1;    
                 DISABLE_SENSE_INT;
@@ -712,11 +712,11 @@ int main (void)
                     SENSE_TOGGLE_INT;
                     ENABLE_SENSE_INT;
                     MinUpmPulse = SetDelay(20);
-                    while(!CheckDelay(MinUpmPulse)); // kurz Synchronisieren
+                    while(!DelayElapsed(MinUpmPulse)); // kurz Synchronisieren
                     PWM = 15;
                     SetPWM();
                     MinUpmPulse = SetDelay(300);
-                    while(!CheckDelay(MinUpmPulse)) // kurz Durchstarten
+                    while(!DelayElapsed(MinUpmPulse)) // kurz Durchstarten
                     {
                       if(Strom > LIMIT_STROM/2) 
                       {

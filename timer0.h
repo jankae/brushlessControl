@@ -1,17 +1,20 @@
-#if defined (__AVR_ATmega8__)
-#define TIMER_TEILER          CK8
-//#define TIMER_RELOAD_VALUE    125
-#endif
+#ifndef _TIMER0_H_
+#define _TIMER0_H_
 
-#define TIM0_START       TIMSK |= 0x01
-#define TIMER2_INT_ENABLE   TIMSK |= 0x40
+#include <avr/io.h>
+#include <avr/interrupt.h>
 
-extern volatile unsigned int CountMilliseconds;
+struct {
+	volatile uint16_t ms;
+	uint8_t overflows;
+} timer0;
+
 extern volatile unsigned char Timer0Overflow;
 
-
-void Timer1_Init(void);
+void Timer0_Init(void);
 void Delay_ms(unsigned int);
-unsigned int SetDelay (unsigned int t);
-char CheckDelay (unsigned int t);
+unsigned int SetDelay(unsigned int t);
+char DelayElapsed(unsigned int t);
+
+#endif
 

@@ -4,6 +4,10 @@
 #ifndef BLMC_H_
 #define BLMC_H_
 
+#include "main.h"
+
+#include "timer0.h"
+
 extern volatile unsigned char Phase;
 extern volatile unsigned char CompInterruptFreigabe;
 

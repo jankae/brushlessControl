@@ -53,17 +53,10 @@
 // +  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // +  POSSIBILITY OF SUCH DAMAGE. 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#include "main.h"
+#include "BLMC.h"
 
 volatile unsigned char Phase = 0;
 volatile unsigned char CompInterruptFreigabe = 0;
-
-//############################################################################
-//
-ISR(TIMER2_OVF_vect)
-//############################################################################
-{
-}
 
 //############################################################################
 // + Interruptroutine
@@ -191,8 +184,8 @@ ISR(ANA_COMP_vect)
 	if (numberOfCommutations++ >= 5) {
 		numberOfCommutations = 0;
 		// calculate time since last commutation
-		unsigned int time = (unsigned int) timer0overflows << 8;
-		timer0overflows = 0;
+		unsigned int time = (unsigned int) timer0.overflows << 8;
+		timer0.overflows = 0;
 		unsigned char timer0 = TCNT0;
 		if(timer0>TIM0atLastCommutation){
 			time += (timer0 - TIM0atLastCommutation);

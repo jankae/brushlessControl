@@ -114,7 +114,6 @@ extern unsigned char MotorAdresse;
 extern unsigned char HwVersion;
 extern unsigned char IntRef;
 unsigned int SIO_Drehzahl;
-volatile unsigned char timer0overflows;
 unsigned int RPM;
 unsigned char TIM0atLastCommutation;
 unsigned int RPMbuffer;
