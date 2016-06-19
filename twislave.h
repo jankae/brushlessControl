@@ -46,7 +46,7 @@ struct {
 	uint16_t timeout;
 }twi;
 
-void InitIC2_Slave (uint8_t adr);
+void twi_Init(uint8_t adr);
 
 #endif
 
