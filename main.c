@@ -110,7 +110,7 @@ void DebugAusgaben(void)
     uart.Analog[0] = Strom;
     uart.Analog[1] = Mittelstrom;
     uart.Analog[2] = SIO_Drehzahl;
-    uart.Analog[3] = RPM;
+    uart.Analog[3] = bldc.RPM;
     uart.Analog[4] = OCR2;
     uart.Analog[5] = PWM;
 }
@@ -156,10 +156,10 @@ char Anwerfen(unsigned char pwm)
 //############################################################################
 {
     unsigned long timer = 300,i;
-    DISABLE_SENSE_INT;
+    BLDC_DisableAutoCommutation();
     PWM = 5;
     SetPWM();
-    Manuell();
+    BLDC_Manuell();
 //    Delay_ms(200);
                     MinUpmPulse = SetDelay(300);
                     while(!DelayElapsed(MinUpmPulse)) 
@@ -191,9 +191,9 @@ char Anwerfen(unsigned char pwm)
          
         timer-= timer/15+1;
         if(timer < 25) { if(TEST_MANUELL) timer = 25; else return(1); }
-        Manuell();
-        Phase++;
-        Phase %= 6;
+        BLDC_Manuell();
+        bldc.phase++;
+        bldc.phase %= 6;
         AdConvert();
         PWM = pwm;
         SetPWM();
@@ -265,7 +265,7 @@ void MotorTon(void)
 
     PORTC &= ~ROT;
     Delay_ms(300 * ADR_TAB[MotorAdresse]);    
-    DISABLE_SENSE_INT;
+    BLDC_DisableAutoCommutation();
     cli();//Globale Interrupts Ausschalten
     STEUER_OFF;
     Strom_max = 0;
@@ -606,12 +606,12 @@ int main (void)
         if(MANUELL_PWM)   PWM = MANUELL_PWM;
 
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        if(Phase != altPhase)   // es gab eine Kommutierung im Interrupt
+        if(bldc.phase != altPhase)   // es gab eine Kommutierung im Interrupt
             {
             MotorGestoppt = 0;
             ZeitFuerBerechnungen = 0;    // direkt nach einer Kommutierung ist Zeit 
             MinUpmPulse = SetDelay(250);  // Timeout, falls ein Motor stehen bleibt
-            altPhase = Phase;
+            altPhase = bldc.phase;
             }
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         if(!PWM)    // Sollwert == 0
@@ -621,7 +621,7 @@ int main (void)
             // nach 1,5 Sekunden den Motor als gestoppt betrachten 
             if(DelayElapsed(MotorGestopptTimer)) 
                 {
-                DISABLE_SENSE_INT;
+                BLDC_DisableAutoCommutation();
                 MotorGestoppt = 1;  
                 STEUER_OFF;
                 } 
@@ -695,7 +695,7 @@ int main (void)
             if((DelayElapsed(MinUpmPulse) && SIO_Drehzahl == 0) || MotorAnwerfen) 
                 {
                 MotorGestoppt = 1;    
-                DISABLE_SENSE_INT;
+                BLDC_DisableAutoCommutation();
                 MinUpmPulse = SetDelay(100);         
                 if(MotorAnwerfen)
                   {
@@ -706,11 +706,11 @@ int main (void)
                    {  
 //                    GRN_ON;
                     MotorGestoppt = 0;    
-                    Phase--;
+                    bldc.phase--;
                     PWM = 1;
                     SetPWM();
                     SENSE_TOGGLE_INT;
-                    ENABLE_SENSE_INT;
+                    BLDC_EnableAutoCommutation();
                     MinUpmPulse = SetDelay(20);
                     while(!DelayElapsed(MinUpmPulse)); // kurz Synchronisieren
                     PWM = 15;

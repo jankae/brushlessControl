@@ -3,6 +3,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "BLMC.h"
 
 struct {
 	volatile uint16_t ms;

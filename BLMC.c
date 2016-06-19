@@ -55,9 +55,6 @@
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #include "BLMC.h"
 
-volatile unsigned char Phase = 0;
-volatile unsigned char CompInterruptFreigabe = 0;
-
 //############################################################################
 // + Interruptroutine
 // + Wird durch den Analogkomperator ausgel�st
@@ -71,7 +68,7 @@ ISR(ANA_COMP_vect)
 			sense = 1;
 		else
 			sense = 0;
-		switch (Phase) {
+		switch (bldc.phase) {
 		case 0:
 			STEUER_A_H
 			;
@@ -83,7 +80,7 @@ ISR(ANA_COMP_vect)
 				SENSE_FALLING_INT;
 				SENSE_B
 				;
-				Phase++;
+				bldc.phase++;
 			} else {
 				STEUER_B_L
 				;
@@ -100,7 +97,7 @@ ISR(ANA_COMP_vect)
 				SENSE_A
 				;
 				SENSE_RISING_INT;
-				Phase++;
+				bldc.phase++;
 			} else {
 				STEUER_A_H
 				;
@@ -118,7 +115,7 @@ ISR(ANA_COMP_vect)
 				SENSE_C
 				;
 				SENSE_FALLING_INT;
-				Phase++;
+				bldc.phase++;
 			} else {
 				STEUER_C_L
 				;
@@ -136,7 +133,7 @@ ISR(ANA_COMP_vect)
 				SENSE_B
 				;
 				SENSE_RISING_INT;
-				Phase++;
+				bldc.phase++;
 			} else {
 				STEUER_B_H
 				;
@@ -154,7 +151,7 @@ ISR(ANA_COMP_vect)
 				SENSE_A
 				;
 				SENSE_FALLING_INT;
-				Phase++;
+				bldc.phase++;
 			} else {
 				STEUER_A_L
 				;
@@ -172,7 +169,7 @@ ISR(ANA_COMP_vect)
 				SENSE_C
 				;
 				SENSE_RISING_INT;
-				Phase = 0;
+				bldc.phase = 0;
 			} else {
 				STEUER_C_H
 				;
@@ -180,30 +177,40 @@ ISR(ANA_COMP_vect)
 			break;
 		}
 	} while ((SENSE_L && sense) || (SENSE_H && !sense));
-	static unsigned char numberOfCommutations = 0;
+	static uint8_t numberOfCommutations = 0;
+	static uint8_t TIM0atLastCommutation = 0;
 	if (numberOfCommutations++ >= 5) {
 		numberOfCommutations = 0;
 		// calculate time since last commutation
-		unsigned int time = (unsigned int) timer0.overflows << 8;
+		uint16_t time = (uint16_t) timer0.overflows << 8;
 		timer0.overflows = 0;
-		unsigned char timer0 = TCNT0;
-		if(timer0>TIM0atLastCommutation){
+		uint8_t timer0 = TCNT0;
+		if (timer0 > TIM0atLastCommutation) {
 			time += (timer0 - TIM0atLastCommutation);
-		}else{
+		} else {
 			time -= (TIM0atLastCommutation - timer0);
 		}
 		TIM0atLastCommutation = timer0;
-		RPM = (60000000L/(POLANZAHL/2))/time;
+		bldc.RPM = (60000000L / (BLDC_NUM_POLES / 2)) / time;
 	}
 	ZeitZumAdWandeln = 0;
 }
 
+inline void BLDC_EnableAutoCommutation() {
+	bldc.commutationActive = 1;
+	ACSR |= (1 << ACIE);
+}
+inline void BLDC_DisableAutoCommutation() {
+	bldc.commutationActive = 0;
+	ACSR &= ~(1 << ACIE);
+}
+
 //############################################################################
 //
-void Manuell(void)
+void BLDC_Manuell(void)
 //############################################################################
 {
-	switch (Phase) {
+	switch (bldc.phase) {
 	case 0:
 		STEUER_A_H
 		;

@@ -6,7 +6,7 @@ ISR(TIMER0_OVF_vect) {
 	if (timer0.overflows < 255) {
 		timer0.overflows++;
 	} else {
-//		RPM = 0;
+		bldc.RPM = 0;
 	}
 	if (!cnt--) {
 		cnt = 3;
