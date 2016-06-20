@@ -62,7 +62,7 @@
 ISR(ANA_COMP_vect)
 //############################################################################
 {
-	uint8_t timer0 = TCNT0;
+	uint8_t cnt0 = TCNT0;
 	unsigned char sense = 0;
 	do {
 		if (SENSE_H)
@@ -185,12 +185,12 @@ ISR(ANA_COMP_vect)
 		// calculate time since last commutation
 		uint16_t time = (uint16_t) timer0.overflows << 8;
 		timer0.overflows = 0;
-		if (timer0 > TIM0atLastCommutation) {
-			time += (timer0 - TIM0atLastCommutation);
+		if (cnt0 > TIM0atLastCommutation) {
+			time += (cnt0 - TIM0atLastCommutation);
 		} else {
-			time -= (TIM0atLastCommutation - timer0);
+			time -= (TIM0atLastCommutation - cnt0);
 		}
-		TIM0atLastCommutation = timer0;
+		TIM0atLastCommutation = cnt0;
 		bldc.RPM = (60000000L / (BLDC_NUM_POLES / 2)) / time;
 	}
 	ZeitZumAdWandeln = 0;
