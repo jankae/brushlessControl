@@ -564,6 +564,7 @@ int main (void)
    // UART_Init();  // war doppelt
     PWM_Init();	
 
+    control_LoadSettings();
     control_Init(&bldc.RPM, &twi.RPM);
 
 
