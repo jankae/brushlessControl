@@ -649,6 +649,13 @@ int main (void)
             		uart.sampleFowardRequest = 0;
             		control.samplingFinished = 0;
             	}
+            } else {
+            	// no sampling request active
+            	// -> control RPM
+            	// TODO set control input to uart.RPM instead of overwriting twi.RPM
+            	if(uart.RPMActive)
+            		twi.RPM = uart.RPM;
+            	control_Update(0);
             }
 #if UART_DEBUG
             DebugAusgaben();  // welche Werte sollen angezeigt werden?
