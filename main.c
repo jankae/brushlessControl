@@ -104,6 +104,7 @@ void SetPWM(void)
 //GRN_ON;
 }
 
+#if UART_DEBUG
 void DebugAusgaben(void)
 {
     uart.Analog[0] = Strom;
@@ -112,6 +113,7 @@ void DebugAusgaben(void)
     uart.Analog[4] = OCR2;
     uart.Analog[5] = PWM;
 }
+#endif
 
 //############################################################################
 //
@@ -173,12 +175,14 @@ char Anwerfen(unsigned char pwm)
     PWM = pwm;
     while(1)
         {
+#if UART_DEBUG
         for(i=0;i<timer; i++) 
             {
             uart_SendDebug();
             Wait(100);  // warten
             } 
         DebugAusgaben();
+#endif
         FastADConvert();
         if(Strom > 60) 
           {
@@ -560,6 +564,8 @@ int main (void)
    // UART_Init();  // war doppelt
     PWM_Init();	
 
+    control_Init(&bldc.RPM, &twi.RPM);
+
 
     twi_Init(0x50);			    
 
@@ -579,7 +585,6 @@ int main (void)
     ADMUX = 1; 
 
     MinUpmPulse = SetDelay(10);
-    uart.Analog[1] = 1;
 
     if(!SollwertErmittlung()) MotorTon();
 //MotorTon();    
@@ -597,6 +602,8 @@ int main (void)
         if(MANUELL_PWM)   PWM = MANUELL_PWM;
 
         PWM = control.out;
+        if(uart.PWMActive)
+        	PWM = uart.PWM;
 
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         if(bldc.phase != altPhase)   // es gab eine Kommutierung im Interrupt
@@ -635,15 +642,18 @@ int main (void)
 //              GRN_ON; 
               FastADConvert();
              }
-            if(!control.samplingFinished){
+            if(uart.sampleFowardRequest){
             	// no sampling data available
             	control_Sample();
+            	if(control.samplingFinished){
+            		uart.sampleFowardRequest = 0;
+            		control.samplingFinished = 0;
+            	}
             }
-            if(SIO_DEBUG)
-                {
-                DebugAusgaben();  // welche Werte sollen angezeigt werden?
-                uart_SendDebug();
-                }
+#if UART_DEBUG
+            DebugAusgaben();  // welche Werte sollen angezeigt werden?
+            uart_SendDebug();
+#endif
             // Berechnen des Mittleren Stroms zur (langsamen) Strombegrenzung
             if(DelayElapsed(MittelstromTimer))   
                 {
