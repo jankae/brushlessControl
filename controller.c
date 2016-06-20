@@ -14,7 +14,10 @@ void control_Init(uint16_t *is, uint16_t *should) {
 }
 
 void control_Update(uint8_t limited) {
-	int16_t diff = *control.should - *control.is;
+	cli();
+	uint16_t isBuffer = *control.is;
+	sei();
+	int16_t diff = *control.should - isBuffer;
 	int16_t out = control.RPMToPWM[*control.should / 100];
 	out += control.P * diff;
 	uint16_t timediff = timer0.ms - control.lastTime;
@@ -35,6 +38,9 @@ void control_Update(uint8_t limited) {
 }
 
 void control_Sample(void) {
+	cli();
+	uint16_t isBuffer = *control.is;
+	sei();
 	if (!control.sampleCharacteristic) {
 		// initiate sampling process
 		control.sampleCharacteristic = 1;
@@ -44,8 +50,8 @@ void control_Sample(void) {
 		// currently sampling
 		if (DelayElapsed(control.sampleTimer)) {
 			// save current sample point
-			if (*control.is < (uint16_t) CONTROL_FORWARD_ARRAY_LENGTH * 100) {
-				control.RPMToPWM[*control.is / 100] = control.out;
+			if (isBuffer < (uint16_t) CONTROL_FORWARD_ARRAY_LENGTH * 100) {
+				control.RPMToPWM[isBuffer / 100] = control.out;
 			}
 			if (control.out < MAX_PWM) {
 				control.out++;
