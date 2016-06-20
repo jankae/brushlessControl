@@ -121,6 +121,7 @@ ISR(USART_RXC_vect) {
 			break;
 		case 1:
 			control.I = udr;
+			uart.RXState = UART_RX_IDLE;
 			break;
 		default:
 			uart.RXState = UART_RX_IDLE;
@@ -142,6 +143,7 @@ ISR(USART_RXC_vect) {
 			uart.PWM = udr;
 			uart.PWMActive = 1;
 			uart.RPMActive = 0;
+			uart.RXState = UART_RX_IDLE;
 			break;
 		default:
 			uart.RXState = UART_RX_IDLE;
@@ -159,6 +161,7 @@ ISR(USART_RXC_vect) {
 		case 1:
 			uart.RPM += udr;
 			uart.RPMActive = 1;
+			uart.RXState = UART_RX_IDLE;
 			break;
 		default:
 			uart.RXState = UART_RX_IDLE;
