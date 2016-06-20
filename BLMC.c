@@ -62,6 +62,7 @@
 ISR(ANA_COMP_vect)
 //############################################################################
 {
+	uint8_t timer0 = TCNT0;
 	unsigned char sense = 0;
 	do {
 		if (SENSE_H)
@@ -184,7 +185,6 @@ ISR(ANA_COMP_vect)
 		// calculate time since last commutation
 		uint16_t time = (uint16_t) timer0.overflows << 8;
 		timer0.overflows = 0;
-		uint8_t timer0 = TCNT0;
 		if (timer0 > TIM0atLastCommutation) {
 			time += (timer0 - TIM0atLastCommutation);
 		} else {
