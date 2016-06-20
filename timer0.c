@@ -3,7 +3,7 @@
 ISR(TIMER0_OVF_vect) {
 	static unsigned char cnt;
 //	Timer0Overflow++;
-	if (timer0.overflows < 255) {
+	if (timer0.overflows != 254) {
 		timer0.overflows++;
 	} else {
 		bldc.RPM = 0;

@@ -63,6 +63,11 @@ ISR(ANA_COMP_vect)
 //############################################################################
 {
 	uint8_t cnt0 = TCNT0;
+	uint8_t additionalOverflows = 0;
+	if(cnt0 < 128 && (TIFR & (1<<TOV0))){
+		// timer overflowed since entering interrupt
+		additionalOverflows = 1;
+	}
 	unsigned char sense = 0;
 	do {
 		if (SENSE_H)
@@ -183,8 +188,12 @@ ISR(ANA_COMP_vect)
 	if (numberOfCommutations++ >= 5) {
 		numberOfCommutations = 0;
 		// calculate time since last commutation
+		if(additionalOverflows)
+			timer0.overflows++;
 		uint16_t time = (uint16_t) timer0.overflows << 8;
 		timer0.overflows = 0;
+		if(additionalOverflows)
+			timer0.overflows = 255;
 		if (cnt0 > TIM0atLastCommutation) {
 			time += (cnt0 - TIM0atLastCommutation);
 		} else {
