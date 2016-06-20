@@ -1,5 +1,10 @@
 #include "controller.h"
 
+uint8_t EEMEM eSettingsValid;
+uint8_t EEMEM eP;
+uint8_t EEMEM eI;
+uint8_t EEMEM eRPMToPWM[CONTROL_FORWARD_ARRAY_LENGTH];
+
 void control_Init(uint16_t *is, uint16_t *should) {
 	control.is = is;
 	control.should = should;
@@ -39,7 +44,7 @@ void control_Sample(void) {
 		// currently sampling
 		if (DelayElapsed(control.sampleTimer)) {
 			// save current sample point
-			if (*control.is < CONTROL_FORWARD_ARRAY_LENGTH * 100) {
+			if (*control.is < (uint16_t) CONTROL_FORWARD_ARRAY_LENGTH * 100) {
 				control.RPMToPWM[*control.is / 100] = control.out;
 			}
 			if (control.out < MAX_PWM) {
@@ -65,5 +70,29 @@ void control_Sample(void) {
 				}
 			}
 		}
+	}
+}
+
+void control_SaveSettings(void) {
+	eeprom_write_byte(&eP, control.P);
+	eeprom_write_byte(&eI, control.I);
+	eeprom_write_block(control.RPMToPWM, eRPMToPWM,
+			CONTROL_FORWARD_ARRAY_LENGTH);
+	eeprom_write_byte(&eSettingsValid, 0x42);
+}
+
+void control_LoadSettings(void) {
+	if (eeprom_read_byte(&eSettingsValid) == 0x42) {
+		// EEPROM contains valid data
+		control.P = eeprom_read_byte(&eP);
+		control.I = eeprom_read_byte(&eI);
+		eeprom_read_block(control.RPMToPWM, eRPMToPWM,
+				CONTROL_FORWARD_ARRAY_LENGTH);
+	} else {
+		// no valid EEPROM data
+		// -> fill with default values
+		control.P = CONTROL_DEFAULT_P;
+		control.I = CONTROL_DEFAULT_I;
+		memset(control.RPMToPWM, 0, CONTROL_FORWARD_ARRAY_LENGTH);
 	}
 }
