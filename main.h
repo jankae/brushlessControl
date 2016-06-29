@@ -3,7 +3,7 @@
 
 //#define MOTORADRESSE      0  // Adresse (1-4)     0 = Motoradresse �ber L�tjumper auf BL-Ctrl V1.1
 
-#define MANUELL_PWM       30   // zur manuellen Vorgabe der PWM  Werte: 0-255
+#define MANUELL_PWM       15   // zur manuellen Vorgabe der PWM  Werte: 0-255
 #define TEST_MANUELL      0   // zum Testen der Hardware ohne Kommutierungsdetektion  Werte: 0-255 (PWM)
 #define TEST_SCHUB        0	  // Erzeugt ein Schubmuster        Werte: 0 = normal 1 = Test
 #define POLANZAHL        14   // Anzahl der Pole (Magnete) Wird nur zur Drehzahlausgabe �ber Debug gebraucht
