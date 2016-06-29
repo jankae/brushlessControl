@@ -32,8 +32,8 @@
 struct {
 	uint8_t sendBuffer[UART_SEND_BUF_LENGTH];
 	uint8_t *sendPointer;
-	uint8_t sendBufPos;
-	uint8_t length;
+	uint16_t sendBufPos;
+	uint16_t length;
 	uint8_t transmissionActive :1;
 	uint8_t sampleFowardRequest :1;
 	uint8_t RPMActive :1;
@@ -44,7 +44,7 @@ struct {
 	uint16_t Analog[UART_NUM_DEBUG];
 #else
 	uint8_t RXState;
-	uint8_t RXCount;
+	uint16_t RXCount;
 #endif
 } uart;
 

@@ -5,7 +5,7 @@
 #include "timer0.h"
 #include "BLMC.h"
 
-#define CONTROL_FORWARD_ARRAY_LENGTH	150
+#define CONTROL_FORWARD_ARRAY_LENGTH	500
 #define CONTROL_DEFAULT_P				0
 #define CONTROL_DEFAULT_I				0
 

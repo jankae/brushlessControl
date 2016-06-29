@@ -18,8 +18,8 @@ void control_Update(uint8_t limited) {
 	uint16_t isBuffer = *control.is;
 	sei();
 	int16_t diff = *control.should - isBuffer;
-	int16_t out = control.RPMToPWM[*control.should / 100];
-	out += control.P * diff;
+	int16_t out = control.RPMToPWM[*control.should / 32];
+	out += ((int32_t) control.P * diff) >> 8;
 	uint16_t timediff = timer0.ms - control.lastTime;
 	control.lastTime = timer0.ms;
 	if (!limited) {
@@ -29,7 +29,7 @@ void control_Update(uint8_t limited) {
 		if (control.integral > 30000)
 			control.integral = 30000;
 	}
-	out += (control.integral * control.I) / 100;
+	out += (int32_t) (control.integral * control.I) >> 8;
 	if (out > 255)
 		out = 255;
 	else if (out < 0)
@@ -50,8 +50,8 @@ void control_Sample(void) {
 		// currently sampling
 		if (DelayElapsed(control.sampleTimer)) {
 			// save current sample point
-			if (isBuffer < (uint16_t) CONTROL_FORWARD_ARRAY_LENGTH * 100) {
-				control.RPMToPWM[isBuffer / 100] = control.out;
+			if (isBuffer < (uint16_t) CONTROL_FORWARD_ARRAY_LENGTH * 32) {
+				control.RPMToPWM[isBuffer / 32] = control.out;
 			}
 			if (control.out < MAX_PWM) {
 				control.out++;
@@ -62,7 +62,7 @@ void control_Sample(void) {
 				control.samplingFinished = 1;
 				control.sampleCharacteristic = 0;
 				// fill (possible) missing values
-				uint8_t i;
+				uint16_t i;
 				uint8_t lastValidPWM = MAX_PWM;
 				for (i = CONTROL_FORWARD_ARRAY_LENGTH - 1; i > 0; i--) {
 					if (control.RPMToPWM[i] == 0) {
