@@ -64,135 +64,88 @@ ISR(ANA_COMP_vect)
 {
 	uint8_t cnt0 = TCNT0;
 	uint8_t additionalOverflows = 0;
-	if(cnt0 < 128 && (TIFR & (1<<TOV0))){
+	if (cnt0 < 128 && (TIFR & (1 << TOV0))) {
 		// timer overflowed since entering interrupt
 		additionalOverflows = 1;
 	}
-	unsigned char sense = 0;
-	do {
-		if (SENSE_H)
-			sense = 1;
-		else
-			sense = 0;
-		switch (bldc.phase) {
-		case 0:
-			STEUER_A_H
-			;
-			if (sense) {
-				STEUER_C_L
-				;
-//				if (ZeitZumAdWandeln)
-//					AdConvert();
-				SENSE_FALLING_INT;
-				SENSE_B
-				;
-				bldc.phase++;
-			} else {
-				STEUER_B_L
-				;
-			}
-			break;
-		case 1:
-			STEUER_C_L
-			;
-			if (!sense) {
-				STEUER_B_H
-				;
-//				if (ZeitZumAdWandeln)
-//					AdConvert();
-				SENSE_A
-				;
-				SENSE_RISING_INT;
-				bldc.phase++;
-			} else {
-				STEUER_A_H
-				;
-			}
-
-			break;
-		case 2:
-			STEUER_B_H
-			;
-			if (sense) {
-				STEUER_A_L
-				;
-//				if (ZeitZumAdWandeln)
-//					AdConvert();
-				SENSE_C
-				;
-				SENSE_FALLING_INT;
-				bldc.phase++;
-			} else {
-				STEUER_C_L
-				;
-			}
-
-			break;
-		case 3:
-			STEUER_A_L
-			;
-			if (!sense) {
-				STEUER_C_H
-				;
-//				if (ZeitZumAdWandeln)
-//					AdConvert();
-				SENSE_B
-				;
-				SENSE_RISING_INT;
-				bldc.phase++;
-			} else {
-				STEUER_B_H
-				;
-			}
-
-			break;
-		case 4:
-			STEUER_C_H
-			;
-			if (sense) {
-				STEUER_B_L
-				;
-//				if (ZeitZumAdWandeln)
-//					AdConvert();
-				SENSE_A
-				;
-				SENSE_FALLING_INT;
-				bldc.phase++;
-			} else {
-				STEUER_A_L
-				;
-			}
-
-			break;
-		case 5:
-			STEUER_B_L
-			;
-			if (!sense) {
-				STEUER_A_H
-				;
-//				if (ZeitZumAdWandeln)
-//					AdConvert();
-				SENSE_C
-				;
-				SENSE_RISING_INT;
-				bldc.phase = 0;
-			} else {
-				STEUER_C_H
-				;
-			}
-			break;
-		}
-	} while ((SENSE_L && sense) || (SENSE_H && !sense));
+	switch (bldc.phase) {
+	case 0:
+		STEUER_A_H
+		;
+		STEUER_C_L
+		;
+//			ADC_Update();
+		SENSE_FALLING_INT;
+		SENSE_B
+		;
+		bldc.phase++;
+		break;
+	case 1:
+		STEUER_C_L
+		;
+		STEUER_B_H
+		;
+//			ADC_Update();
+		SENSE_A
+		;
+		SENSE_RISING_INT;
+		bldc.phase++;
+		break;
+	case 2:
+		STEUER_B_H
+		;
+		STEUER_A_L
+		;
+//			ADC_Update();
+		SENSE_C
+		;
+		SENSE_FALLING_INT;
+		bldc.phase++;
+		break;
+	case 3:
+		STEUER_A_L
+		;
+		STEUER_C_H
+		;
+//			ADC_Update();
+		SENSE_B
+		;
+		SENSE_RISING_INT;
+		bldc.phase++;
+		break;
+	case 4:
+		STEUER_C_H
+		;
+		STEUER_B_L
+		;
+//			ADC_Update();
+		SENSE_A
+		;
+		SENSE_FALLING_INT;
+		bldc.phase++;
+		break;
+	case 5:
+		STEUER_B_L
+		;
+		STEUER_A_H
+		;
+//			ADC_Update();
+		SENSE_C
+		;
+		SENSE_RISING_INT;
+		bldc.phase = 0;
+		break;
+	}
 	static uint8_t numberOfCommutations = 0;
 	static uint8_t TIM0atLastCommutation = 0;
 	if (numberOfCommutations++ >= 5) {
 		numberOfCommutations = 0;
 		// calculate time since last commutation
-		if(additionalOverflows)
+		if (additionalOverflows)
 			timer0.overflows++;
 		uint16_t time = (uint16_t) timer0.overflows << 8;
 		timer0.overflows = 0;
-		if(additionalOverflows)
+		if (additionalOverflows)
 			timer0.overflows = 255;
 		if (cnt0 > TIM0atLastCommutation) {
 			time += (cnt0 - TIM0atLastCommutation);

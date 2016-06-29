@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "timer0.h"
+#include "analog.h"
 
 #define BLDC_NUM_POLES			14
 #define MAX_PWM        		 	255
