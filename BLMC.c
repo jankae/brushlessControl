@@ -85,7 +85,7 @@ ISR(ANA_COMP_vect)
 		;
 		STEUER_B_H
 		;
-//			ADC_Update();
+		ADC_Update();
 		SENSE_A
 		;
 		SENSE_RISING_INT;
@@ -96,7 +96,7 @@ ISR(ANA_COMP_vect)
 		;
 		STEUER_A_L
 		;
-//			ADC_Update();
+		ADC_Update();
 		SENSE_C
 		;
 		SENSE_FALLING_INT;
@@ -107,7 +107,7 @@ ISR(ANA_COMP_vect)
 		;
 		STEUER_C_H
 		;
-//			ADC_Update();
+		ADC_Update();
 		SENSE_B
 		;
 		SENSE_RISING_INT;
@@ -118,7 +118,7 @@ ISR(ANA_COMP_vect)
 		;
 		STEUER_B_L
 		;
-//			ADC_Update();
+		ADC_Update();
 		SENSE_A
 		;
 		SENSE_FALLING_INT;
@@ -129,12 +129,17 @@ ISR(ANA_COMP_vect)
 		;
 		STEUER_A_H
 		;
-//			ADC_Update();
+		ADC_Update();
 		SENSE_C
 		;
 		SENSE_RISING_INT;
 		bldc.phase = 0;
 		break;
+	}
+	// reset comparator interrupt flag if necessary
+	// (could have been triggered during ADC reading)
+	if (ACSR & (1 << ACI)) {
+		ACSR |= (1 << ACI);
 	}
 	static uint8_t numberOfCommutations = 0;
 	static uint8_t TIM0atLastCommutation = 0;
