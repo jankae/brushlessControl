@@ -28,6 +28,8 @@
 #define UART_RX_SET_PWM				9
 #define UART_RX_SET_RPM				10
 #define UART_RX_DISABLE_OVERRIDE	11
+#define UART_RX_SEND_VOLTAGE		12
+#define UART_RX_SEND_CURRENT		13
 
 struct {
 	uint8_t sendBuffer[UART_SEND_BUF_LENGTH];

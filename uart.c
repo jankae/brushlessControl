@@ -94,8 +94,8 @@ ISR(USART_RXC_vect) {
 			break;
 		case UART_RX_SEND_FORWARD:
 			if (!uart.transmissionActive) {
-				uart.length = CONTROL_FORWARD_ARRAY_LENGTH;
-				uart.sendPointer = control.RPMToPWM;
+				uart.length = sizeof(control.RPMToPWM);
+				uart.sendPointer = (uint8_t*) control.RPMToPWM;
 				uart_StartTransmission();
 			}
 			uart.RXState = UART_RX_IDLE;
@@ -107,6 +107,26 @@ ISR(USART_RXC_vect) {
 		case UART_RX_DISABLE_OVERRIDE:
 			uart.PWMActive = 0;
 			uart.RPMActive = 0;
+			uart.RXState = UART_RX_IDLE;
+			break;
+		case UART_RX_SEND_VOLTAGE:
+			if (!uart.transmissionActive) {
+				uart.sendBuffer[0] = state.voltage >> 8;
+				uart.sendBuffer[1] = state.voltage & 0xFF;
+				uart.length = 2;
+				uart.sendPointer = uart.sendBuffer;
+				uart_StartTransmission();
+			}
+			uart.RXState = UART_RX_IDLE;
+			break;
+		case UART_RX_SEND_CURRENT:
+			if (!uart.transmissionActive) {
+				uart.sendBuffer[0] = state.current >> 8;
+				uart.sendBuffer[1] = state.current & 0xFF;
+				uart.length = 2;
+				uart.sendPointer = uart.sendBuffer;
+				uart_StartTransmission();
+			}
 			uart.RXState = UART_RX_IDLE;
 			break;
 		default:
