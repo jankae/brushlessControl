@@ -3,7 +3,7 @@
 uint8_t EEMEM eSettingsValid;
 uint8_t EEMEM eP;
 uint8_t EEMEM eI;
-uint8_t EEMEM eRPMToPWM[CONTROL_FORWARD_ARRAY_LENGTH];
+uint16_t EEMEM eRPMToPWM[CONTROL_FORWARD_ARRAY_LENGTH];
 
 void control_Init(uint16_t *is, uint16_t *should) {
 	control.is = is;
@@ -18,7 +18,7 @@ void control_Update(uint8_t limited) {
 	uint16_t isBuffer = *control.is;
 	sei();
 	int16_t diff = *control.should - isBuffer;
-	int16_t out = control.RPMToPWM[*control.should / 32];
+	int16_t out = control.RPMToPWM[*control.should / 64];
 	out += ((int32_t) control.P * diff) >> 8;
 	uint16_t timediff = timer0.ms - control.lastTime;
 	control.lastTime = timer0.ms;
@@ -46,12 +46,17 @@ void control_Sample(void) {
 		control.sampleCharacteristic = 1;
 		control.sampleTimer = SetDelay(3000);
 		control.out = MIN_PWM;
+		uint16_t i;
+		for (i = 0; i < CONTROL_FORWARD_ARRAY_LENGTH; i++) {
+			control.RPMToPWM[i] = 0;
+		}
 	} else {
 		// currently sampling
 		if (DelayElapsed(control.sampleTimer)) {
 			// save current sample point
-			if (isBuffer < (uint16_t) CONTROL_FORWARD_ARRAY_LENGTH * 32) {
-				control.RPMToPWM[isBuffer / 32] = control.out;
+			if (isBuffer < (uint16_t) CONTROL_FORWARD_ARRAY_LENGTH * 64) {
+				control.RPMToPWM[isBuffer / 64] = control_PWMToVoltage(
+						control.out, state.voltage);
 			}
 			if (control.out < MAX_PWM) {
 				control.out++;
@@ -63,7 +68,7 @@ void control_Sample(void) {
 				control.sampleCharacteristic = 0;
 				// fill (possible) missing values
 				uint16_t i;
-				uint8_t lastValidPWM = MAX_PWM;
+				uint16_t lastValidPWM = 16800;
 				for (i = CONTROL_FORWARD_ARRAY_LENGTH - 1; i > 0; i--) {
 					if (control.RPMToPWM[i] == 0) {
 						// missing value found
