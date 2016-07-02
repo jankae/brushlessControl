@@ -722,6 +722,9 @@ int main(void)
 					twi.RPM = uart.RPM;
 				control_Update(0);
 			}
+			State_Update();
+			if (!bldc.commutationActive)
+				ADC_Update();
 #if UART_DEBUG
 			DebugAusgaben();  // welche Werte sollen angezeigt werden?
 			uart_SendDebug();
@@ -744,23 +747,23 @@ int main(void)
 					if (MaxPWM < MAX_PWM)
 						MaxPWM++;
 				}
-				analog.channel = 7;
-				if (analog.done) {
-					analog.done = 0;
-					if (!uart.transmissionActive) {
-						uart.length = 5;
-						uint8_t buf[5];
-						buf[0] = analog.result / 1000 % 10 + '0';
-						buf[1] = analog.result / 100 % 10 + '0';
-						buf[2] = analog.result / 10 % 10 + '0';
-						buf[3] = analog.result % 10 + '0';
-						buf[4] = '\n';
-						uart.sendPointer = buf;
-						uart_StartTransmission();
-					}
-				} else {
-					analog.request = 1;
-				}
+//				analog.channel = 7;
+//				if (analog.done) {
+//					analog.done = 0;
+//					if (!uart.transmissionActive) {
+//						uart.length = 5;
+//						uint8_t buf[5];
+//						buf[0] = analog.result / 1000 % 10 + '0';
+//						buf[1] = analog.result / 100 % 10 + '0';
+//						buf[2] = analog.result / 10 % 10 + '0';
+//						buf[3] = analog.result % 10 + '0';
+//						buf[4] = '\n';
+//						uart.sendPointer = buf;
+//						uart_StartTransmission();
+//					}
+//				} else {
+//					analog.request = 1;
+//				}
 			}
 
 			// Motor Stehen geblieben
