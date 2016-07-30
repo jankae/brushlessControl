@@ -101,7 +101,6 @@
 #include "BLMC.h"
 #include "controller.h"
 
-extern unsigned int  I2C_Timeout;
 extern unsigned int  PWM;
 extern unsigned int  Strom;     //ca. in 0,1A
 extern unsigned char Strom_max;

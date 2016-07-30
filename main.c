@@ -59,7 +59,6 @@ unsigned int PWM = 0;
 unsigned int Strom = 0, RuheStrom; //ca. in 0,1A
 unsigned char Strom_max = 0;
 unsigned char Mittelstrom = 0;
-unsigned int I2C_Timeout = 0;
 unsigned char ZeitFuerBerechnungen = 1;
 unsigned char MotorAnwerfen = 0;
 unsigned char MotorGestoppt = 1;
@@ -542,26 +541,33 @@ void MotorTon(void)
 
 //############################################################################
 //
-unsigned char SollwertErmittlung(void)
+unsigned char GetPWM(void)
 //############################################################################
 {
-	static unsigned int sollwert = 0;
-	if (!I2C_Timeout)   // bei Erreichen von 0 ist der Wert ung�ltig
-	// Kein g�ltiger Sollwert
-	{
-		if (!TEST_SCHUB) {
-			if (sollwert)
-				sollwert--;
+	uint8_t pwm;
+	if (uart.PWMActive) {
+		pwm = uart.PWM;
+	} else if (uart.RPMActive) {
+		control.is = &uart.RPM;
+		pwm = control.out;
+	} else {
+		// at this point the control data must come from the TWI
+		if (DelayElapsed(twi.timeout)) {
+			// no valid TWI data
+			pwm = 0;
+			PORTC |= ROT;
+		} else {
+			// valid TWI data
+			PORTC &= ~ROT;
+			if (!twi.controllerActive) {
+				pwm = twi.PWM;
+			} else {
+				control.is = &twi.RPM;
+				pwm = control.out;
+			}
 		}
-		PORTC |= ROT;
-	} else // I2C-Daten sind g�ltig
-	{
-		sollwert = twi.PWM;
-		PORTC &= ~ROT;
 	}
-	if (sollwert > MAX_PWM)
-		sollwert = MAX_PWM;
-	return (sollwert);
+	return pwm;
 }
 
 //############################################################################
@@ -635,7 +641,7 @@ int main(void)
 	MinUpmPulse = SetDelay(103);
 	MittelstromTimer = SetDelay(254);
 	while (!DelayElapsed(MinUpmPulse)) {
-		if (SollwertErmittlung())
+		if (GetPWM())
 			break;
 	}
 
@@ -649,7 +655,7 @@ int main(void)
 
 	MinUpmPulse = SetDelay(10);
 
-	if (!SollwertErmittlung())
+	if (!GetPWM())
 		MotorTon();
 //MotorTon();    
 	PORTB = 0x31; // Pullups wieder einschalten
@@ -661,13 +667,7 @@ int main(void)
 	while (1) {
 //ShowSense();
 
-		if (!TEST_SCHUB)
-			PWM = SollwertErmittlung();
-		//I2C_TXBuffer = PWM; // Antwort �ber I2C-Bus
-
-		PWM = control.out;
-		if (uart.PWMActive)
-			PWM = uart.PWM;
+		PWM = GetPWM();
 
 		if (MANUELL_PWM)
 			PWM = MANUELL_PWM;
@@ -703,10 +703,6 @@ int main(void)
 		SetPWM();
 		// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		if (!ZeitFuerBerechnungen++) {
-			if (MotorGestoppt) {
-//              GRN_ON; 
-//              FastADConvert();
-			}
 			if (uart.sampleFowardRequest) {
 				// no sampling data available
 				control_Sample();
@@ -717,9 +713,10 @@ int main(void)
 			} else {
 				// no sampling request active
 				// -> control RPM
-				// TODO set control input to uart.RPM instead of overwriting twi.RPM
 				if (uart.RPMActive)
-					twi.RPM = uart.RPM;
+					control.is = &uart.RPM;
+				else
+					control.is = &twi.RPM;
 				control_Update(0);
 			}
 			State_Update();
@@ -799,7 +796,7 @@ int main(void)
 //							}
 //						}
 						altPhase = bldc.phase;
-					} else if (SollwertErmittlung())
+					} else if (GetPWM())
 						MotorAnwerfen = 1;
 				}
 			}
