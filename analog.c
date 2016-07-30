@@ -8,7 +8,7 @@ void ADC_Update(void) {
 	if (analog.request) {
 		// save sense channel
 		uint8_t sense = ADMUX;
-		SFIOR = 0x00;  // Analog Comperator aus
+//		SFIOR = 0x00;  // Analog Comperator aus
 		// select channel and select AVCC reference
 		ADMUX = analog.channel | (1<<REFS1) | (1<<REFS0);
 		/*
@@ -24,7 +24,7 @@ void ADC_Update(void) {
 		ADCSRA = 0x00;
 		// reset ADMUX
 		ADMUX = sense;
-		SFIOR = 0x08;  // Analog Comperator ein
+//		SFIOR = 0x08;  // Analog Comperator ein
 		analog.request = 0;
 		analog.result = ADC;
 		analog.done = 1;

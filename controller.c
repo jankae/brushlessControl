@@ -19,7 +19,7 @@ void control_Update(uint8_t limited) {
 	sei();
 	int16_t diff = *control.should - isBuffer;
 	int16_t out = control.RPMToPWM[*control.should / 64];
-	out += ((int32_t) control.P * diff) >> 8;
+	out += ((int32_t) control.P * diff) >> 3;
 	uint16_t timediff = timer0.ms - control.lastTime;
 	control.lastTime = timer0.ms;
 	if (!limited) {
@@ -30,6 +30,7 @@ void control_Update(uint8_t limited) {
 			control.integral = 30000;
 	}
 	out += (int32_t) (control.integral * control.I) >> 8;
+	out = control_VoltageToPWM(out, state.voltage);
 	if (out > 255)
 		out = 255;
 	else if (out < 0)
